@@ -67,6 +67,51 @@ npm run check   # syntax check plus the test suite
 No runtime or dev dependencies: the tests run on plain Node (24+) with the
 built-in `assert`/`fetch` APIs.
 
+## Releasing
+
+Releases are **published by GitHub Actions**, not from a workstation: a tag push
+is the trigger. The local step only decides the version, keeps the market index
+in sync, commits, tags, and pushes.
+
+```bash
+# 1. land your change on main (the test workflow verifies it)
+git add -A && git commit -m "feat: ..." && git push
+
+# 2. cut the release — bumps the version, updates index.json, tags, pushes
+npm run release patch -- --push     # or: minor / major
+```
+
+What the `publish` workflow then does, in order:
+
+1. run the full test suite (same commands as `npm test`)
+2. assert the tag (`v1.2.3`) matches `package.json` `version`
+3. verify the npm token (`npm whoami`) and check whether the version is already
+   published — an existing version is skipped, so re-runs and manual publishes
+   never fail the pipeline
+4. `npm publish --access public --provenance` (falls back to a plain publish if
+   the signed path is unavailable)
+5. create the GitHub release, using `.github/release-notes/<tag>.md` when present
+   (its first `# heading` becomes the release title) or generated notes otherwise
+
+### Repository secrets
+
+| Secret | Purpose |
+|---|---|
+| `NPM_TOKEN` | npm **Automation** token (Classic) with publish rights. `Publish`-type tokens fail in CI with `EOTP` because they need a one-time password. |
+
+### Release notes
+
+Add `.github/release-notes/v<version>.md` before releasing. Start it with a
+single `# title` line (used as the release title, then stripped from the body),
+keep the rest bilingual in this repository's style. See
+[CHANGELOG.md](CHANGELOG.md) for the running history.
+
+### Market index
+
+`index.json` is the DSH market index (format 1). `npm run release` prepends the
+new version automatically; `node tests/verify-index.mjs` (part of `npm test`)
+fails when it drifts from `package.json`.
+
 ## Requirements
 
 - DSH `0.2.2-rc.5` or newer within the `0.2.x` line.
@@ -153,6 +198,43 @@ npm run check   # 语法检查 + 全部测试
 ```
 
 无任何运行时与开发依赖：测试直接在 Node 24+ 上运行（使用内置 `assert` / `fetch`）。
+
+### 发布流程
+
+发布**由 GitHub Actions 完成**，触发条件是推送 tag；本地只负责决定版本号、
+同步市场索引、提交、打 tag、推送。
+
+```bash
+# 1. 改动先落到 main（test 工作流会自动验证）
+git add -A && git commit -m "feat: ..." && git push
+
+# 2. 发版：升版本、同步 index.json、打 tag、推送
+npm run release patch -- --push     # 或 minor / major
+```
+
+随后 `publish` 工作流依次执行：
+
+1. 跑完整测试（与 `npm test` 相同）
+2. 校验 tag（`v1.2.3`）与 `package.json` 的 `version` 一致
+3. 校验 npm token（`npm whoami`）并检查该版本是否已发布——已发布则跳过，
+   因此重跑与手动发布都不会让流水线变红
+4. `npm publish --access public --provenance`（签名路径不可用时自动降级为普通发布）
+5. 创建 GitHub Release：若存在 `.github/release-notes/<tag>.md` 则用其正文
+   （首行 `# 标题` 作为 Release 标题），否则使用自动生成的变更说明
+
+**仓库 Secret**
+
+| Secret | 用途 |
+|---|---|
+| `NPM_TOKEN` | npm **Automation** 类型（Classic）token，具备发布权限。`Publish` 类型在 CI 里会因需要一次性密码而报 `EOTP`。 |
+
+**发版文案**：发布前新增 `.github/release-notes/v<版本>.md`，首行写一个 `# 标题`
+（用作 Release 标题，正文中会被去掉），其余按本仓库的中英双语风格书写。
+历史记录见 [CHANGELOG.md](CHANGELOG.md)。
+
+**市场索引**：`index.json` 是 DSH 市场索引（格式 1），`npm run release` 会自动前置
+新版本；`node tests/verify-index.mjs`（包含在 `npm test` 中）会在它与
+`package.json` 不一致时失败。
 
 ### 隐私与磁盘占用
 

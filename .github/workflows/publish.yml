@@ -149,6 +149,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       # 发布成功后为 tag 建 GitHub Release；已有则跳过，可安全重跑。
+      # 标题取自文案文件的首行 H1，没有则用 tag 名。
       - name: Create GitHub release
         if: github.event_name == 'push'
         env:
@@ -160,8 +161,20 @@ jobs:
             exit 0
           fi
           notes=".github/release-notes/${GITHUB_REF_NAME}.md"
+          title="$GITHUB_REF_NAME"
           if [ -f "$notes" ]; then
-            gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes-file "$notes"
+            first_line=$(head -n 1 "$notes")
+            case "$first_line" in
+              '# '*)
+                title="${first_line#\# }"
+                tail -n +2 "$notes" > /tmp/release-body.md
+                ;;
+              *)
+                cp "$notes" /tmp/release-body.md
+                ;;
+            esac
+            echo "title: $title"
+            gh release create "$GITHUB_REF_NAME" --title "$title" --notes-file /tmp/release-body.md
           else
-            gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --generate-notes
+            gh release create "$GITHUB_REF_NAME" --title "$title" --generate-notes
           fi
