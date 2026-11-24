@@ -1,6 +1,6 @@
 {
   "name": "@hapyp/dsh-session-search",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Search message and tool text across every DSH session and workspace, plus an in-conversation Ctrl+F find bar",
   "keywords": [
     "deepseek-harness",
@@ -44,7 +44,9 @@
     "LICENSE"
   ],
   "dsh": {
-    "bundle": { "patch": "./cordis.patch.yml" },
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
     "client": {
       "platform": "web",
       "immediately": true,
@@ -78,14 +80,32 @@
     "@deepseek-ai/dsh-session-query": ">=0.2.2-rc.5 <0.3.0-0"
   },
   "peerDependenciesMeta": {
-    "@deepseek-ai/cordis": { "optional": true },
-    "@deepseek-ai/dsh-client-locale": { "optional": true },
-    "@deepseek-ai/dsh-client-ui-conversation": { "optional": true },
-    "@deepseek-ai/dsh-client-ui-layout": { "optional": true },
-    "@deepseek-ai/dsh-client-ui-renderer": { "optional": true },
-    "@deepseek-ai/dsh-client-ui-sidebar": { "optional": true },
-    "@deepseek-ai/dsh-client-ui-workspace": { "optional": true },
-    "@deepseek-ai/dsh-client-connection": { "optional": true },
-    "@deepseek-ai/dsh-session-query": { "optional": true }
+    "@deepseek-ai/cordis": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-client-locale": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-client-ui-conversation": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-client-ui-layout": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-client-ui-renderer": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-client-ui-sidebar": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-client-ui-workspace": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-client-connection": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-session-query": {
+      "optional": true
+    }
   }
 }
