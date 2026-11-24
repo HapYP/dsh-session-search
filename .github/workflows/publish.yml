@@ -92,9 +92,17 @@ jobs:
           if [ $status -ne 0 ]; then
             {
               echo '### npm publish (with provenance) failed'
+              echo ''
+              echo '**错误行：**'
+              echo '```'
+              grep -E 'npm (error|ERR!)' /tmp/publish-provenance.log | head -20
+              echo '```'
+              echo '<details><summary>完整输出（末尾 3000 字符）</summary>'
+              echo ''
               echo '```'
               tail -c 3000 /tmp/publish-provenance.log
               echo '```'
+              echo '</details>'
             } >> "$GITHUB_STEP_SUMMARY"
             detail=$(grep -m1 -E 'npm (error|ERR!)' /tmp/publish-provenance.log | head -c 400)
             echo "::error::publish with provenance failed: ${detail:-unknown npm error, see step log}"
@@ -115,9 +123,17 @@ jobs:
           if [ $status -ne 0 ]; then
             {
               echo '### npm publish (plain) failed'
+              echo ''
+              echo '**错误行：**'
+              echo '```'
+              grep -E 'npm (error|ERR!)' /tmp/publish-plain.log | head -20
+              echo '```'
+              echo '<details><summary>完整输出（末尾 3000 字符）</summary>'
+              echo ''
               echo '```'
               tail -c 3000 /tmp/publish-plain.log
               echo '```'
+              echo '</details>'
             } >> "$GITHUB_STEP_SUMMARY"
             detail=$(grep -m1 -E 'npm (error|ERR!)' /tmp/publish-plain.log | head -c 400)
             echo "::error::publish failed: ${detail:-unknown npm error, see step log}"
