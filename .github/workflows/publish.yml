@@ -45,7 +45,25 @@ jobs:
       - name: Verify npm token
         run: |
           echo "registry: $(npm config get registry)"
-          npm whoami
+          if [ -z "${NODE_AUTH_TOKEN}" ]; then
+            echo "::error::NPM_TOKEN is empty or not exposed to this job (check the repository Actions secret name)"
+            exit 1
+          fi
+          echo "token length: ${#NODE_AUTH_TOKEN}"
+          set +e
+          whoami_output=$(npm whoami 2>&1)
+          status=$?
+          echo "$whoami_output"
+          if [ $status -ne 0 ]; then
+            {
+              echo '### npm token check failed'
+              echo '```'
+              echo "$whoami_output"
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::error::npm whoami failed: $(echo "$whoami_output" | head -c 300)"
+            exit 1
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -66,7 +84,22 @@ jobs:
         id: publish_provenance
         if: steps.published.outputs.already == 'false'
         continue-on-error: true
-        run: npm publish --access public --provenance
+        run: |
+          set +e
+          npm publish --access public --provenance > /tmp/publish-provenance.log 2>&1
+          status=$?
+          cat /tmp/publish-provenance.log
+          if [ $status -ne 0 ]; then
+            {
+              echo '### npm publish (with provenance) failed'
+              echo '```'
+              tail -c 3000 /tmp/publish-provenance.log
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+            detail=$(grep -m1 -E 'npm (error|ERR!)' /tmp/publish-provenance.log | head -c 400)
+            echo "::error::publish with provenance failed: ${detail:-unknown npm error, see step log}"
+          fi
+          exit $status
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -75,6 +108,20 @@ jobs:
         if: steps.published.outputs.already == 'false' && steps.publish_provenance.outcome == 'failure'
         run: |
           echo "::warning::publish with provenance failed; retrying without provenance"
-          npm publish --access public
+          set +e
+          npm publish --access public > /tmp/publish-plain.log 2>&1
+          status=$?
+          cat /tmp/publish-plain.log
+          if [ $status -ne 0 ]; then
+            {
+              echo '### npm publish (plain) failed'
+              echo '```'
+              tail -c 3000 /tmp/publish-plain.log
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+            detail=$(grep -m1 -E 'npm (error|ERR!)' /tmp/publish-plain.log | head -c 400)
+            echo "::error::publish failed: ${detail:-unknown npm error, see step log}"
+          fi
+          exit $status
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
