@@ -106,6 +106,9 @@ jobs:
             } >> "$GITHUB_STEP_SUMMARY"
             detail=$(grep -m1 -E 'npm (error|ERR!)' /tmp/publish-provenance.log | head -c 400)
             echo "::error::publish with provenance failed: ${detail:-unknown npm error, see step log}"
+            if grep -q 'EOTP' /tmp/publish-provenance.log; then
+              echo "::error::EOTP means the NPM_TOKEN requires a one-time password. Create a Classic token of type 'Automation' (or a Granular token with publish rights) and update the NPM_TOKEN secret."
+            fi
           fi
           exit $status
         env:
@@ -137,6 +140,9 @@ jobs:
             } >> "$GITHUB_STEP_SUMMARY"
             detail=$(grep -m1 -E 'npm (error|ERR!)' /tmp/publish-plain.log | head -c 400)
             echo "::error::publish failed: ${detail:-unknown npm error, see step log}"
+            if grep -q 'EOTP' /tmp/publish-plain.log; then
+              echo "::error::EOTP means the NPM_TOKEN requires a one-time password. Create a Classic token of type 'Automation' (or a Granular token with publish rights) and update the NPM_TOKEN secret."
+            fi
           fi
           exit $status
         env:
