@@ -1,0 +1,5 @@
+# 本 bundle 的组合：只插入本插件一行，不改动任何官方行或官方配置。
+- insert:
+    - id: session-content-search
+      name: '@hapyp/dsh-session-search'
+      config: {}

@@ -1,0 +1,7 @@
+{
+  "meta": {
+    "title": "Session content search",
+    "description": "Search message and tool text across every workspace from a palette (Ctrl+Shift+F or the sidebar button), and find inside the current conversation with Ctrl+F. Requires the built-in Session search backend.",
+    "detail": "docs/DETAIL.md"
+  }
+}

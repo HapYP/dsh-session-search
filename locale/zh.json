@@ -1,0 +1,7 @@
+{
+  "meta": {
+    "title": "会话内容搜索",
+    "description": "通过搜索面板（Ctrl+Shift+F 或侧栏按钮）跨所有工作区搜索会话的消息与工具文本；在会话中按 Ctrl+F 在当前对话内查找。需要内置的“会话搜索”后端。",
+    "detail": "docs/DETAIL.zh.md"
+  }
+}

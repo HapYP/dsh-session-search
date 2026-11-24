@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Build and pack output
+*.tgz
+dist/
+
+# Local runtime artifacts
+*.log
+.DS_Store
+Thumbs.db
+
+# Editor and tooling
+.vscode/
+.idea/
+*.swp
+
+# Test and mock render output
+mockups/*.png
