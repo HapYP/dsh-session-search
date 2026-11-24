@@ -17,3 +17,7 @@ Thumbs.db
 
 # Test and mock render output
 mockups/*.png
+
+# Git worktree artifacts
+*.orig
+*.rej

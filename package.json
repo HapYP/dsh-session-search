@@ -63,7 +63,8 @@
   },
   "scripts": {
     "test": "node tests/test-host-handler.mjs && node tests/smoke-client.mjs && node tests/verify-index.mjs",
-    "check": "node --check client.js && node --check index.js && npm test"
+    "check": "node --check client.js && node --check index.js && npm test",
+    "release": "node scripts/release.mjs"
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.1.0",
