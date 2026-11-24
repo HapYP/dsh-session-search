@@ -1,0 +1,35 @@
+name: test
+
+# 每次推送到 main 或 PR 时验证插件行为。
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: ['24']
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Syntax check
+        run: |
+          node --check client.js
+          node --check index.js
+
+      - name: Host integration tests
+        run: node tests/test-host-handler.mjs
+
+      - name: Client factory smoke test
+        run: node tests/smoke-client.mjs
+
+      - name: Verify market index
+        run: node tests/verify-index.mjs

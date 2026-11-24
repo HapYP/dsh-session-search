@@ -1,5 +1,9 @@
 # @hapyp/dsh-session-search
 
+[![npm version](https://img.shields.io/npm/v/@hapyp/dsh-session-search.svg)](https://www.npmjs.com/package/@hapyp/dsh-session-search)
+[![license](https://img.shields.io/npm/l/@hapyp/dsh-session-search.svg)](LICENSE)
+[![test](https://github.com/HapYP/dsh-session-search/actions/workflows/test.yml/badge.svg)](https://github.com/HapYP/dsh-session-search/actions/workflows/test.yml)
+
 [中文](#中文) | English
 
 Search **session content** across every DSH workspace, and find inside the
@@ -40,6 +44,28 @@ dsh plugin add @hapyp/dsh-session-search
 ```
 
 After installing, reload the DSH page (`Ctrl+R`).
+
+### Or install from the plugin market index
+
+This repository serves a DSH market index (format 1) so the plugin can be
+browsed in **Plugins → Discover**:
+
+```
+https://raw.githubusercontent.com/HapYP/dsh-session-search/main/index.json
+```
+
+Add that URL as a plugin index in DSH, then pick *Session content search* from
+the Discover tab.
+
+## Development
+
+```bash
+npm test     # host integration tests + client smoke test + market index check
+npm run check   # syntax check plus the test suite
+```
+
+No runtime or dev dependencies: the tests run on plain Node (24+) with the
+built-in `assert`/`fetch` APIs.
 
 ## Requirements
 
@@ -109,6 +135,25 @@ DSH 内置的侧栏搜索只匹配会话标题。本插件补上内容搜索：�
 ```
 
 安装后按 `Ctrl+R` 刷新页面。
+
+### 或从插件市场索引安装
+
+本仓库同时提供 DSH 市场索引（格式 1），可在**插件 → 发现**中浏览安装：
+
+```
+https://raw.githubusercontent.com/HapYP/dsh-session-search/main/index.json
+```
+
+在 DSH 中添加该索引地址，然后在「发现」页选择「会话内容搜索」即可。
+
+### 开发
+
+```bash
+npm test        # Host 集成测试 + Client 冒烟 + 市场索引校验
+npm run check   # 语法检查 + 全部测试
+```
+
+无任何运行时与开发依赖：测试直接在 Node 24+ 上运行（使用内置 `assert` / `fetch`）。
 
 ### 隐私与磁盘占用
 
