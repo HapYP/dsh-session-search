@@ -5,6 +5,11 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '已存在的版本号（如 1.0.1），仅用于重试发布'
+        required: false
 
 permissions:
   contents: read
@@ -23,9 +28,10 @@ jobs:
 
       # 零运行时依赖：测试直接用 node 运行 .mjs 用例
       - name: Test
-        run: node tests/test-host-handler.mjs && node tests/smoke-client.mjs
+        run: node tests/test-host-handler.mjs && node tests/smoke-client.mjs && node tests/verify-index.mjs
 
       - name: Check tag matches package version
+        if: github.event_name == 'push'
         run: |
           PKG_VERSION=$(node -p "require('./package.json').version")
           TAG_VERSION="${GITHUB_REF_NAME#v}"
@@ -35,7 +41,15 @@ jobs:
             exit 1
           fi
 
-      # A tag pushed after a manual publish must not fail the run.
+      # 令牌自检：失败会明确指出是认证问题，而不是笼统的发布失败。
+      - name: Verify npm token
+        run: |
+          echo "registry: $(npm config get registry)"
+          npm whoami
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # 已发布的版本不重复发布（手动发布后再推 tag 也不会红）。
       - name: Check whether this version is already published
         id: published
         run: |
@@ -48,8 +62,19 @@ jobs:
             echo "already=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Publish
+      - name: Publish (with provenance)
+        id: publish_provenance
         if: steps.published.outputs.already == 'false'
+        continue-on-error: true
         run: npm publish --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # provenance 在不支持的环境里可能失败，回退到普通发布，保证版本能上线。
+      - name: Publish (without provenance fallback)
+        if: steps.published.outputs.already == 'false' && steps.publish_provenance.outcome == 'failure'
+        run: |
+          echo "::warning::publish with provenance failed; retrying without provenance"
+          npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
