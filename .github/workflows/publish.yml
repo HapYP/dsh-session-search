@@ -12,7 +12,7 @@ on:
         required: false
 
 permissions:
-  contents: read
+  contents: write # create the GitHub release for the tag
   id-token: write # npm provenance
 
 jobs:
@@ -147,3 +147,21 @@ jobs:
           exit $status
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # 发布成功后为 tag 建 GitHub Release；已有则跳过，可安全重跑。
+      - name: Create GitHub release
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            echo "release $GITHUB_REF_NAME already exists - nothing to do"
+            exit 0
+          fi
+          notes=".github/release-notes/${GITHUB_REF_NAME}.md"
+          if [ -f "$notes" ]; then
+            gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes-file "$notes"
+          else
+            gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --generate-notes
+          fi
